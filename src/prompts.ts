@@ -1,6 +1,6 @@
 import path from "node:path";
 import fs from "fs-extra";
-import { confirm, input, select } from "@inquirer/prompts";
+import { input, select } from "@inquirer/prompts";
 import type {
   ApiDocs,
   AuthType,
@@ -19,13 +19,40 @@ type SelectChoice<T extends string> = {
   name: string;
   value: T;
   disabled?: boolean | string;
+  short?: string;
 };
 
 function numberedChoices<T extends string>(choices: SelectChoice<T>[]): SelectChoice<T>[] {
   return choices.map((choice, index) => ({
     ...choice,
-    name: `${index + 1}. ${choice.name}`
+    name: `${index + 1}. ${choice.name}`,
+    short: choice.short ?? choice.name
   }));
+}
+
+async function confirmYesNo(message: string): Promise<boolean> {
+  const answer = await input({
+    message: `${message} (Yes/No)`,
+    validate(value) {
+      return parseYesNo(value) === undefined ? "Please enter Yes or No." : true;
+    }
+  });
+
+  return parseYesNo(answer) ?? false;
+}
+
+function parseYesNo(value: string): boolean | undefined {
+  const normalizedValue = value.trim().toLowerCase();
+
+  if (["y", "yes"].includes(normalizedValue)) {
+    return true;
+  }
+
+  if (["n", "no"].includes(normalizedValue)) {
+    return false;
+  }
+
+  return undefined;
 }
 
 export async function promptForProjectOptions(defaultName?: string): Promise<ProjectOptions> {
@@ -38,10 +65,7 @@ export async function promptForProjectOptions(defaultName?: string): Promise<Pro
   const targetDirectory = path.resolve(process.cwd(), projectName);
   const exists = await fs.pathExists(targetDirectory);
   const overwrite = exists
-    ? await confirm({
-      message: `Folder "${projectName}" already exists. Overwrite it?`,
-      default: false
-    })
+    ? await confirmYesNo(`Folder "${projectName}" already exists. Overwrite it?`)
     : false;
 
   const framework = await select<Framework>({
@@ -138,8 +162,8 @@ export async function promptForProjectOptions(defaultName?: string): Promise<Pro
     ])
   });
 
-  const includeDocker = await confirm({ message: "Include Docker?", default: true });
-  const includeLinting = await confirm({ message: "Include ESLint and Prettier?", default: true });
+  const includeDocker = await confirmYesNo("Include Docker?");
+  const includeLinting = await confirmYesNo("Include ESLint and Prettier?");
 
   const testing = await select<Testing>({
     message: "Include testing setup?",
@@ -150,11 +174,8 @@ export async function promptForProjectOptions(defaultName?: string): Promise<Pro
     ])
   });
 
-  const initGit = await confirm({ message: "Initialize Git?", default: true });
-  const installDependencies = await confirm({
-    message: "Install dependencies after generation?",
-    default: true
-  });
+  const initGit = await confirmYesNo("Initialize Git?");
+  const installDependencies = await confirmYesNo("Install dependencies after generation?");
 
   return {
     projectName,
