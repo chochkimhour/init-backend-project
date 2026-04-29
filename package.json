@@ -1,6 +1,6 @@
 {
   "name": "init-backend-project",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Create production-ready Node.js, Express, Fastify, and NestJS backend starter projects with one CLI command.",
   "type": "module",
   "main": "./dist/cli.js",
