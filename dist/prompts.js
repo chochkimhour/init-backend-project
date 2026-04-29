@@ -56,8 +56,8 @@ export async function promptForProjectOptions(defaultName) {
         message: "ORM:",
         choices: [
             { name: "None", value: "none" },
-            { name: "Prisma", value: "prisma" },
-            { name: "TypeORM", value: "typeorm" },
+            { name: "Prisma", value: "prisma", disabled: database === "none" || database === "redis" ? "Requires SQL or MongoDB" : false },
+            { name: "TypeORM", value: "typeorm", disabled: database === "none" || database === "redis" ? "Requires SQL or MongoDB" : false },
             { name: "Mongoose", value: "mongoose", disabled: database !== "mongodb" ? "MongoDB only" : false }
         ]
     });

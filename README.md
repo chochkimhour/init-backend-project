@@ -1,12 +1,13 @@
 # init-backend-project
 
-[![npm version](https://img.shields.io/npm/v/init-backend-project.svg)](https://www.npmjs.com/package/init-backend-project)
-[![npm downloads](https://img.shields.io/npm/dm/init-backend-project.svg)](https://www.npmjs.com/package/init-backend-project)
-[![source](https://img.shields.io/badge/source-GitHub-181717.svg)](https://github.com/chochkimhour/init-backend-project)
-[![cli](https://img.shields.io/badge/CLI-init--backend--project-0ea5e9.svg)](https://www.npmjs.com/package/init-backend-project)
-[![license](https://img.shields.io/npm/l/init-backend-project.svg)](LICENSE)
+[![npm](https://img.shields.io/badge/npm-init--backend--project-cb3837)](https://www.npmjs.com/package/init-backend-project)
+[![version](https://img.shields.io/badge/version-1.0.0-blue)](https://www.npmjs.com/package/init-backend-project)
+[![downloads](https://img.shields.io/npm/dm/init-backend-project?label=downloads&color=0ea5e9)](https://www.npmjs.com/package/init-backend-project)
+[![source](https://img.shields.io/badge/source-GitHub-181717)](https://github.com/chochkimhour/init-backend-project)
+[![CI](https://github.com/chochkimhour/init-backend-project/actions/workflows/ci.yml/badge.svg)](https://github.com/chochkimhour/init-backend-project/actions/workflows/ci.yml)
+[![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-A professional CLI for creating clean, runnable backend starter projects in JavaScript or TypeScript.
+A professional backend project generator for creating clean, runnable Node.js, Express, Fastify, and NestJS starter projects in JavaScript or TypeScript.
 
 `init-backend-project` helps you start a backend project with a practical structure, ready-to-run code, framework templates, environment setup, health checks, error handling, and optional tools such as Docker, testing, linting, authentication, validation, and databases.
 

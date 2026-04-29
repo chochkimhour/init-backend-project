@@ -3,6 +3,7 @@ import fs from "fs-extra";
 import ora from "ora";
 import { applyTemplateReplacements, getTemplateDirectory } from "./templates.js";
 import { logger } from "./utils/logger.js";
+import { formatLabel } from "./utils/labels.js";
 import { runCommand } from "./utils/runCommand.js";
 const TEXT_EXTENSIONS = new Set([
     ".js",
@@ -16,6 +17,12 @@ const TEXT_EXTENSIONS = new Set([
     ".yml",
     ".yaml"
 ]);
+const BASE_APP_FILES = [
+    "package.json",
+    "README.md",
+    ".env.example",
+    ".gitignore"
+];
 export async function generateProject(options) {
     if (await fs.pathExists(options.targetDirectory)) {
         if (!options.overwrite) {
@@ -29,10 +36,7 @@ export async function generateProject(options) {
     const spinner = ora("Creating project files...").start();
     try {
         await copyTemplate(options);
-        await writeJson(path.join(options.targetDirectory, "package.json"), createPackageJson(options));
-        await fs.writeFile(path.join(options.targetDirectory, "README.md"), createProjectReadme(options));
-        await fs.writeFile(path.join(options.targetDirectory, ".env.example"), createEnvExample(options));
-        await fs.writeFile(path.join(options.targetDirectory, ".gitignore"), createGitignore());
+        await writeBaseProjectFiles(options);
         if (options.includeDocker) {
             await writeDockerFiles(options);
         }
@@ -72,6 +76,15 @@ export async function generateProject(options) {
     }
     printSuccessMessage(options);
 }
+async function writeBaseProjectFiles(options) {
+    const [packageJsonFile, readmeFile, envFile, gitignoreFile] = BASE_APP_FILES.map((file) => path.join(options.targetDirectory, file));
+    await Promise.all([
+        writeJson(packageJsonFile, createPackageJson(options)),
+        fs.writeFile(readmeFile, createProjectReadme(options)),
+        fs.writeFile(envFile, createEnvExample(options)),
+        fs.writeFile(gitignoreFile, createGitignore())
+    ]);
+}
 async function copyTemplate(options) {
     const templateDirectory = getTemplateDirectory(options.framework, options.language);
     if (!(await fs.pathExists(templateDirectory))) {
@@ -100,18 +113,37 @@ function isTextTemplate(file) {
     return TEXT_EXTENSIONS.has(path.extname(file)) || basename.startsWith(".env") || basename.startsWith(".git");
 }
 function createPackageJson(options) {
-    const isTs = options.language === "typescript" || options.framework === "nestjs";
-    const dependencies = new Set();
-    const devDependencies = new Set();
-    const scripts = {};
+    const { dependencies, devDependencies } = createDependencySets(options);
+    const isTs = isTypeScriptProject(options);
+    return {
+        name: options.projectName,
+        version: "1.0.0",
+        description: `Backend API generated with init-backend-project.`,
+        type: options.language === "javascript" && options.framework !== "nestjs" ? "commonjs" : "module",
+        main: options.framework === "nestjs" ? "dist/main.js" : isTs ? "dist/server.js" : "src/server.js",
+        scripts: createScripts(options),
+        dependencies: toVersionMap(dependencies),
+        devDependencies: toVersionMap(devDependencies),
+        license: "MIT"
+    };
+}
+function createDependencySets(options) {
+    const dependencySet = {
+        dependencies: new Set(),
+        devDependencies: new Set()
+    };
+    addFrameworkDependencies(options, dependencySet);
+    addDatabaseDependencies(options, dependencySet);
+    addFeatureDependencies(options, dependencySet);
+    addToolingDependencies(options, dependencySet);
+    return dependencySet;
+}
+function addFrameworkDependencies(options, dependencySet) {
+    const { dependencies, devDependencies } = dependencySet;
+    const isTs = isTypeScriptProject(options);
     if (options.framework === "express") {
-        ["express", "cors", "dotenv", "morgan"].forEach((dependency) => dependencies.add(dependency));
-        if (isTs) {
-            ["@types/express", "@types/cors", "@types/morgan"].forEach((dependency) => devDependencies.add(dependency));
-        }
-        else {
-            devDependencies.add("nodemon");
-        }
+        addDependencies(dependencies, ["express", "cors", "dotenv", "morgan"]);
+        isTs ? addDependencies(devDependencies, ["@types/express", "@types/cors", "@types/morgan"]) : devDependencies.add("nodemon");
     }
     if (options.framework === "nodejs") {
         dependencies.add("dotenv");
@@ -120,77 +152,25 @@ function createPackageJson(options) {
         }
     }
     if (options.framework === "fastify") {
-        ["fastify", "@fastify/cors", "dotenv"].forEach((dependency) => dependencies.add(dependency));
+        addDependencies(dependencies, ["fastify", "@fastify/cors", "dotenv"]);
         if (!isTs) {
             devDependencies.add("nodemon");
         }
     }
     if (options.framework === "nestjs") {
-        [
+        addDependencies(dependencies, [
             "@nestjs/common",
             "@nestjs/core",
             "@nestjs/platform-express",
             "@nestjs/config",
             "reflect-metadata",
             "rxjs"
-        ].forEach((dependency) => dependencies.add(dependency));
-        ["@nestjs/cli", "@nestjs/schematics"].forEach((dependency) => devDependencies.add(dependency));
+        ]);
+        addDependencies(devDependencies, ["@nestjs/cli", "@nestjs/schematics"]);
     }
-    addDatabaseDependencies(options, dependencies, devDependencies);
-    addFeatureDependencies(options, dependencies, devDependencies);
-    if (isTs) {
-        ["typescript", "tsx", "@types/node"].forEach((dependency) => devDependencies.add(dependency));
-    }
-    if (options.includeLinting) {
-        ["eslint", "prettier", "@eslint/js", "typescript-eslint"].forEach((dependency) => devDependencies.add(dependency));
-    }
-    if (options.testing === "jest") {
-        devDependencies.add("jest");
-        if (isTs) {
-            devDependencies.add("ts-jest");
-            devDependencies.add("@types/jest");
-        }
-    }
-    if (options.testing === "vitest") {
-        devDependencies.add("vitest");
-    }
-    if (options.framework === "nestjs") {
-        scripts.start = "nest start";
-        scripts["start:dev"] = "nest start --watch";
-        scripts.build = "nest build";
-    }
-    else if (isTs) {
-        scripts.dev = "tsx watch src/server.ts";
-        scripts.build = "tsc";
-        scripts.start = "node dist/server.js";
-    }
-    else {
-        scripts.dev = "nodemon src/server.js";
-        scripts.start = "node src/server.js";
-    }
-    if (options.includeLinting) {
-        scripts.lint = "eslint .";
-        scripts.format = "prettier --write .";
-    }
-    if (options.testing === "jest") {
-        scripts.test = "jest";
-    }
-    if (options.testing === "vitest") {
-        scripts.test = "vitest";
-    }
-    return {
-        name: options.projectName,
-        version: "1.0.0",
-        description: `Backend API generated with init-backend-project.`,
-        type: options.language === "javascript" && options.framework !== "nestjs" ? "commonjs" : "module",
-        main: options.framework === "nestjs" ? "dist/main.js" : isTs ? "dist/server.js" : "src/server.js",
-        scripts,
-        dependencies: toVersionMap(dependencies),
-        devDependencies: toVersionMap(devDependencies),
-        license: "MIT"
-    };
 }
-function addDatabaseDependencies(options, dependencies, devDependencies) {
+function addDatabaseDependencies(options, dependencySet) {
+    const { dependencies, devDependencies } = dependencySet;
     if (options.database === "postgresql") {
         dependencies.add("pg");
     }
@@ -212,11 +192,12 @@ function addDatabaseDependencies(options, dependencies, devDependencies) {
         dependencies.add("reflect-metadata");
     }
 }
-function addFeatureDependencies(options, dependencies, devDependencies) {
+function addFeatureDependencies(options, dependencySet) {
+    const { dependencies, devDependencies } = dependencySet;
     if (options.authType === "jwt") {
         dependencies.add("jsonwebtoken");
         dependencies.add("bcryptjs");
-        if (options.language === "typescript" || options.framework === "nestjs") {
+        if (isTypeScriptProject(options)) {
             devDependencies.add("@types/jsonwebtoken");
             devDependencies.add("@types/bcryptjs");
         }
@@ -245,6 +226,59 @@ function addFeatureDependencies(options, dependencies, devDependencies) {
         dependencies.add("class-validator");
         dependencies.add("class-transformer");
     }
+}
+function addToolingDependencies(options, dependencySet) {
+    const { devDependencies } = dependencySet;
+    const isTs = isTypeScriptProject(options);
+    if (isTs) {
+        addDependencies(devDependencies, ["typescript", "tsx", "@types/node"]);
+    }
+    if (options.includeLinting) {
+        addDependencies(devDependencies, ["eslint", "prettier", "@eslint/js", "typescript-eslint"]);
+    }
+    if (options.testing === "jest") {
+        devDependencies.add("jest");
+        if (isTs) {
+            addDependencies(devDependencies, ["ts-jest", "@types/jest"]);
+        }
+    }
+    if (options.testing === "vitest") {
+        devDependencies.add("vitest");
+    }
+}
+function createScripts(options) {
+    const scripts = {};
+    if (options.framework === "nestjs") {
+        scripts.start = "nest start";
+        scripts["start:dev"] = "nest start --watch";
+        scripts.build = "nest build";
+    }
+    else if (isTypeScriptProject(options)) {
+        scripts.dev = "tsx watch src/server.ts";
+        scripts.build = "tsc";
+        scripts.start = "node dist/server.js";
+    }
+    else {
+        scripts.dev = "nodemon src/server.js";
+        scripts.start = "node src/server.js";
+    }
+    if (options.includeLinting) {
+        scripts.lint = "eslint .";
+        scripts.format = "prettier --write .";
+    }
+    if (options.testing === "jest") {
+        scripts.test = "jest";
+    }
+    if (options.testing === "vitest") {
+        scripts.test = "vitest";
+    }
+    return scripts;
+}
+function addDependencies(target, dependencies) {
+    dependencies.forEach((dependency) => target.add(dependency));
+}
+function isTypeScriptProject(options) {
+    return options.language === "typescript" || options.framework === "nestjs";
 }
 function toVersionMap(dependencies) {
     return Object.fromEntries([...dependencies].sort().map((dependency) => [dependency, "latest"]));
@@ -278,14 +312,19 @@ pnpm-debug.log*
 `;
 }
 async function writeDockerFiles(options) {
-    const isTs = options.language === "typescript" || options.framework === "nestjs";
-    const startCommand = options.framework === "nestjs" ? "npm run start" : isTs ? "npm run build && npm run start" : "npm run start";
+    const isTs = isTypeScriptProject(options);
+    const runtime = getPackageManagerRuntime(options.packageManager);
+    const startCommand = options.framework === "nestjs"
+        ? `${runtime.run} start`
+        : isTs
+            ? `${runtime.run} build && ${runtime.run} start`
+            : `${runtime.run} start`;
     await fs.writeFile(path.join(options.targetDirectory, "Dockerfile"), `FROM node:22-alpine
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+${runtime.prepareCommand ? `${runtime.prepareCommand}\n` : ""}RUN ${runtime.installCommand}
 
 COPY . .
 
@@ -299,8 +338,29 @@ coverage
 .git
 `);
 }
+function getPackageManagerRuntime(packageManager) {
+    if (packageManager === "yarn") {
+        return {
+            prepareCommand: "RUN corepack enable",
+            installCommand: "yarn install",
+            run: "yarn"
+        };
+    }
+    if (packageManager === "pnpm") {
+        return {
+            prepareCommand: "RUN corepack enable",
+            installCommand: "pnpm install",
+            run: "pnpm"
+        };
+    }
+    return {
+        prepareCommand: "",
+        installCommand: "npm install",
+        run: "npm run"
+    };
+}
 async function writeLintingFiles(options) {
-    const isTs = options.language === "typescript" || options.framework === "nestjs";
+    const isTs = isTypeScriptProject(options);
     const config = isTs
         ? `import js from "@eslint/js";
 import tseslint from "typescript-eslint";
@@ -332,7 +392,7 @@ export default [
 }
 async function writeTestingFiles(options) {
     if (options.testing === "jest") {
-        const isTs = options.language === "typescript" || options.framework === "nestjs";
+        const isTs = isTypeScriptProject(options);
         const fileName = isTs ? "jest.config.js" : "jest.config.cjs";
         const config = isTs
             ? `export default {
@@ -372,20 +432,21 @@ function createProjectReadme(options) {
     const devCommand = options.framework === "nestjs" ? `${options.packageManager} run start:dev` : `${options.packageManager} run dev`;
     const buildCommand = `${options.packageManager} run build`;
     const installCommand = getInstallCommand(options.packageManager);
+    const scripts = getGeneratedScriptDescriptions(options);
     return `# ${options.projectName}
 
 Backend API generated with init-backend-project.
 
 ## Stack
 
-- Framework: ${label(options.framework)}
-- Language: ${label(options.framework === "nestjs" ? "typescript" : options.language)}
-- Database: ${label(options.database)}
-- ORM: ${label(options.orm)}
-- Authentication: ${label(options.authType)}
-- API documentation: ${label(options.apiDocs)}
-- Validation: ${label(options.validation)}
-- Testing: ${label(options.testing)}
+- Framework: ${formatLabel(options.framework)}
+- Language: ${formatLabel(options.framework === "nestjs" ? "typescript" : options.language)}
+- Database: ${formatLabel(options.database)}
+- ORM: ${formatLabel(options.orm)}
+- Authentication: ${formatLabel(options.authType)}
+- API documentation: ${formatLabel(options.apiDocs)}
+- Validation: ${formatLabel(options.validation)}
+- Testing: ${formatLabel(options.testing)}
 
 ## Installation
 
@@ -407,7 +468,7 @@ The API runs at \`http://localhost:3000\`.
 
 ## Build
 
-${options.language === "typescript" || options.framework === "nestjs" ? `\`\`\`bash
+${isTypeScriptProject(options) ? `\`\`\`bash
 ${buildCommand}
 \`\`\`` : "This JavaScript project does not require a build step."}
 
@@ -428,16 +489,46 @@ src/
 
 ## Scripts
 
-- \`dev\` or \`start:dev\` - Run the development server
-- \`start\` - Run the production server
-- \`build\` - Compile TypeScript projects
-- \`lint\` - Run ESLint when included
-- \`test\` - Run tests when included
+${scripts.map((script) => `- \`${script.name}\` - ${script.description}`).join("\n")}
 
 ## License
 
 MIT
 `;
+}
+function getGeneratedScriptDescriptions(options) {
+    const scripts = [
+        {
+            name: options.framework === "nestjs" ? "start:dev" : "dev",
+            description: "Run the development server"
+        },
+        {
+            name: "start",
+            description: "Run the production server"
+        }
+    ];
+    if (isTypeScriptProject(options)) {
+        scripts.push({
+            name: "build",
+            description: "Compile TypeScript"
+        });
+    }
+    if (options.includeLinting) {
+        scripts.push({
+            name: "lint",
+            description: "Run ESLint"
+        }, {
+            name: "format",
+            description: "Format files with Prettier"
+        });
+    }
+    if (options.testing !== "none") {
+        scripts.push({
+            name: "test",
+            description: "Run tests"
+        });
+    }
+    return scripts;
 }
 function getInstallCommand(packageManager) {
     if (packageManager === "yarn") {
@@ -447,33 +538,6 @@ function getInstallCommand(packageManager) {
         return "pnpm install";
     }
     return "npm install";
-}
-function label(value) {
-    const labels = {
-        express: "Express",
-        nodejs: "Node.js",
-        fastify: "Fastify",
-        nestjs: "NestJS",
-        javascript: "JavaScript",
-        typescript: "TypeScript",
-        none: "None",
-        postgresql: "PostgreSQL",
-        mysql: "MySQL",
-        mongodb: "MongoDB",
-        redis: "Redis",
-        prisma: "Prisma",
-        typeorm: "TypeORM",
-        mongoose: "Mongoose",
-        jwt: "JWT Auth",
-        session: "Session Auth",
-        swagger: "Swagger / OpenAPI",
-        zod: "Zod",
-        joi: "Joi",
-        "class-validator": "class-validator",
-        jest: "Jest",
-        vitest: "Vitest"
-    };
-    return labels[value] ?? value;
 }
 function printSuccessMessage(options) {
     const devScript = options.framework === "nestjs" ? "start:dev" : "dev";

@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Framework, Language, ProjectOptions } from "./types.js";
+import { formatLabel } from "./utils/labels.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,22 +36,4 @@ export function applyTemplateReplacements(content: string, options: ProjectOptio
     (result, [key, value]) => result.replaceAll(`{{${key}}}`, value),
     content
   );
-}
-
-function formatLabel(value: string) {
-  const labels: Record<string, string> = {
-    nestjs: "NestJS",
-    nodejs: "Node.js",
-    jwt: "JWT Auth",
-    session: "Session Auth",
-    none: "None",
-    postgresql: "PostgreSQL",
-    mysql: "MySQL",
-    mongodb: "MongoDB",
-    redis: "Redis",
-    swagger: "Swagger / OpenAPI",
-    "class-validator": "class-validator"
-  };
-
-  return labels[value] ?? value.charAt(0).toUpperCase() + value.slice(1);
 }

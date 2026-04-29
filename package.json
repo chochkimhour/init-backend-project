@@ -1,7 +1,7 @@
 {
   "name": "init-backend-project",
   "version": "1.0.0",
-  "description": "A professional backend project scaffolding CLI for JavaScript and TypeScript.",
+  "description": "Create production-ready Node.js, Express, Fastify, and NestJS backend starter projects with one CLI command.",
   "type": "module",
   "main": "./dist/cli.js",
   "types": "./dist/cli.d.ts",
@@ -20,17 +20,51 @@
     "prepublishOnly": "npm run build"
   },
   "keywords": [
+    "init-backend-project",
     "backend",
+    "backend-starter",
+    "backend-template",
+    "backend-generator",
+    "api-starter",
+    "api-template",
+    "node",
+    "nodejs",
+    "nodejs-starter",
+    "nodejs-template",
     "cli",
     "scaffold",
+    "scaffolding",
     "generator",
+    "project-generator",
     "express",
+    "express-starter",
+    "express-template",
     "fastify",
+    "fastify-starter",
+    "fastify-template",
     "nestjs",
-    "typescript"
+    "nestjs-starter",
+    "nestjs-template",
+    "typescript",
+    "typescript-starter",
+    "javascript",
+    "rest-api",
+    "api",
+    "docker",
+    "prisma",
+    "typeorm",
+    "mongoose"
   ],
   "author": "Choch Kimhour",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chochkimhour/init-backend-project.git"
+  },
+  "bugs": {
+    "url": "https://github.com/chochkimhour/init-backend-project/issues"
+  },
+  "homepage": "https://www.npmjs.com/package/init-backend-project",
   "publishConfig": {
     "access": "public"
   },
