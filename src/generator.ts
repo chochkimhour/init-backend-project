@@ -36,12 +36,10 @@ type DependencySet = {
 const DEPENDENCY_VERSIONS: Record<string, string> = {
   "@eslint/js": "9.39.1",
   "@fastify/cors": "11.1.0",
-  "@nestjs/cli": "11.0.10",
   "@nestjs/common": "11.1.8",
   "@nestjs/config": "4.0.2",
   "@nestjs/core": "11.1.8",
   "@nestjs/platform-express": "11.1.8",
-  "@nestjs/schematics": "11.0.9",
   "@nestjs/swagger": "11.2.1",
   "@prisma/client": "6.19.0",
   "@types/bcryptjs": "2.4.6",
@@ -235,21 +233,17 @@ function addFrameworkDependencies(options: ProjectOptions, dependencySet: Depend
 
   if (options.framework === "express") {
     addDependencies(dependencies, ["express", "cors", "dotenv", "morgan"]);
-    isTs ? addDependencies(devDependencies, ["@types/express", "@types/cors", "@types/morgan"]) : devDependencies.add("nodemon");
+    if (isTs) {
+      addDependencies(devDependencies, ["@types/express", "@types/cors", "@types/morgan"]);
+    }
   }
 
   if (options.framework === "nodejs") {
     dependencies.add("dotenv");
-    if (!isTs) {
-      devDependencies.add("nodemon");
-    }
   }
 
   if (options.framework === "fastify") {
     addDependencies(dependencies, ["fastify", "@fastify/cors", "dotenv"]);
-    if (!isTs) {
-      devDependencies.add("nodemon");
-    }
   }
 
   if (options.framework === "nestjs") {
@@ -261,7 +255,7 @@ function addFrameworkDependencies(options: ProjectOptions, dependencySet: Depend
       "reflect-metadata",
       "rxjs"
     ]);
-    addDependencies(devDependencies, ["@nestjs/cli", "@nestjs/schematics", "@types/express"]);
+    devDependencies.add("@types/express");
   }
 }
 
@@ -341,10 +335,16 @@ function addToolingDependencies(options: ProjectOptions, dependencySet: Dependen
 
   if (isTs) {
     addDependencies(devDependencies, ["typescript", "tsx", "@types/node"]);
+  } else {
+    devDependencies.add("nodemon");
   }
 
   if (options.includeLinting) {
-    addDependencies(devDependencies, ["eslint", "prettier", "@eslint/js", "typescript-eslint"]);
+    addDependencies(devDependencies, ["eslint", "prettier", "@eslint/js"]);
+
+    if (isTs) {
+      devDependencies.add("typescript-eslint");
+    }
   }
 
   if (options.testing === "jest") {
@@ -363,9 +363,10 @@ function createScripts(options: ProjectOptions) {
   const scripts: Record<string, string> = {};
 
   if (options.framework === "nestjs") {
-    scripts.start = "nest start";
-    scripts["start:dev"] = "nest start --watch";
-    scripts.build = "nest build";
+    scripts.dev = "tsx watch src/main.ts";
+    scripts["start:dev"] = "tsx watch src/main.ts";
+    scripts.build = "tsc";
+    scripts.start = "node dist/main.js";
   } else if (isTypeScriptProject(options)) {
     scripts.dev = "tsx watch src/server.ts";
     scripts.build = "tsc";
@@ -465,9 +466,7 @@ async function writeDockerFiles(options: ProjectOptions) {
   const isTs = isTypeScriptProject(options);
   const runtime = getPackageManagerRuntime(options.packageManager);
   const startCommand =
-    options.framework === "nestjs"
-      ? `${runtime.run} start`
-      : isTs
+    isTs
         ? `${runtime.run} build && ${runtime.run} start`
         : `${runtime.run} start`;
 
@@ -502,7 +501,7 @@ function getPackageManagerRuntime(packageManager: ProjectOptions["packageManager
   if (packageManager === "yarn") {
     return {
       prepareCommand: "RUN corepack enable",
-      installCommand: "yarn install",
+      installCommand: "yarn install --prefer-offline",
       run: "yarn"
     };
   }
@@ -510,14 +509,14 @@ function getPackageManagerRuntime(packageManager: ProjectOptions["packageManager
   if (packageManager === "pnpm") {
     return {
       prepareCommand: "RUN corepack enable",
-      installCommand: "pnpm install",
+      installCommand: "pnpm install --prefer-offline",
       run: "pnpm"
     };
   }
 
   return {
     prepareCommand: "",
-    installCommand: "npm install",
+    installCommand: "npm install --no-audit --no-fund --prefer-offline",
     run: "npm run"
   };
 }
@@ -615,7 +614,7 @@ export default defineConfig({
 
 async function installDependencies(options: ProjectOptions) {
   const commands = {
-    npm: ["npm", ["install", "--no-audit", "--no-fund", "--prefer-offline"]],
+    npm: ["npm", ["install", "--no-audit", "--no-fund", "--prefer-offline", "--loglevel=error"]],
     yarn: ["yarn", ["install", "--prefer-offline"]],
     pnpm: ["pnpm", ["install", "--prefer-offline"]]
   } as const;

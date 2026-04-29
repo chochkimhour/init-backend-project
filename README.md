@@ -134,7 +134,6 @@ project-name/
       health/
     app.module.ts
     main.ts
-  nest-cli.json
   tsconfig.json
   package.json
   README.md
@@ -228,7 +227,7 @@ Build TypeScript projects:
 npm run build
 ```
 
-NestJS projects use:
+NestJS projects also support the familiar alias:
 
 ```bash
 npm run start:dev
