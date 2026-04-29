@@ -697,12 +697,10 @@ function printSuccessMessage(options: ProjectOptions) {
   logger.plain("");
 
   logger.plain("- Next steps");
-  logger.plain("-----------------");
   commands.forEach((command) => logger.plain(`  ${command}`));
   logger.plain("");
 
   logger.plain("- API endpoints");
-  logger.plain("-----------------");
   logger.plain("  Local API:    http://localhost:3000");
   logger.plain("  Health check: http://localhost:3000/health");
   logger.plain("");
