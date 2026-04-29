@@ -33,6 +33,59 @@ type DependencySet = {
   devDependencies: Set<string>;
 };
 
+const DEPENDENCY_VERSIONS: Record<string, string> = {
+  "@eslint/js": "9.39.1",
+  "@fastify/cors": "11.1.0",
+  "@nestjs/cli": "11.0.10",
+  "@nestjs/common": "11.1.8",
+  "@nestjs/config": "4.0.2",
+  "@nestjs/core": "11.1.8",
+  "@nestjs/platform-express": "11.1.8",
+  "@nestjs/schematics": "11.0.9",
+  "@nestjs/swagger": "11.2.1",
+  "@prisma/client": "6.19.0",
+  "@types/bcryptjs": "2.4.6",
+  "@types/cors": "2.8.19",
+  "@types/express": "5.0.5",
+  "@types/jest": "30.0.0",
+  "@types/jsonwebtoken": "9.0.10",
+  "@types/morgan": "1.9.10",
+  "@types/node": "22.19.1",
+  "@types/swagger-jsdoc": "6.0.4",
+  "@types/swagger-ui-express": "4.1.8",
+  "bcryptjs": "3.0.3",
+  "class-transformer": "0.5.1",
+  "class-validator": "0.14.2",
+  "cors": "2.8.5",
+  "dotenv": "16.6.1",
+  "eslint": "9.39.1",
+  "express": "5.1.0",
+  "fastify": "5.6.2",
+  "jest": "30.2.0",
+  "joi": "18.0.2",
+  "jsonwebtoken": "9.0.2",
+  "mongodb": "6.21.0",
+  "mongoose": "8.20.0",
+  "morgan": "1.10.1",
+  "mysql2": "3.15.3",
+  "nodemon": "3.1.11",
+  "pg": "8.16.3",
+  "prettier": "3.6.2",
+  "prisma": "6.19.0",
+  "redis": "5.10.0",
+  "reflect-metadata": "0.2.2",
+  "rxjs": "7.8.2",
+  "swagger-jsdoc": "6.2.8",
+  "swagger-ui-express": "5.0.1",
+  "ts-jest": "29.4.5",
+  "tsx": "4.20.6",
+  "typeorm": "0.3.27",
+  "typescript": "5.9.3",
+  "typescript-eslint": "8.48.0",
+  "vitest": "3.2.4",
+  "zod": "3.25.76"
+};
+
 export async function generateProject(options: ProjectOptions) {
   if (await fs.pathExists(options.targetDirectory)) {
     if (!options.overwrite) {
@@ -347,7 +400,9 @@ function isTypeScriptProject(options: ProjectOptions) {
 }
 
 function toVersionMap(dependencies: Set<string>) {
-  return Object.fromEntries([...dependencies].sort().map((dependency) => [dependency, "latest"]));
+  return Object.fromEntries(
+    [...dependencies].sort().map((dependency) => [dependency, DEPENDENCY_VERSIONS[dependency] ?? "latest"])
+  );
 }
 
 async function writeJson(file: string, value: unknown) {
@@ -560,9 +615,9 @@ export default defineConfig({
 
 async function installDependencies(options: ProjectOptions) {
   const commands = {
-    npm: ["npm", ["install"]],
-    yarn: ["yarn", ["install"]],
-    pnpm: ["pnpm", ["install"]]
+    npm: ["npm", ["install", "--no-audit", "--no-fund", "--prefer-offline"]],
+    yarn: ["yarn", ["install", "--prefer-offline"]],
+    pnpm: ["pnpm", ["install", "--prefer-offline"]]
   } as const;
 
   const [command, args] = commands[options.packageManager];
