@@ -1,169 +1,56 @@
 # init-backend-project
 
-A professional backend project scaffolding CLI for JavaScript and TypeScript.
+[![npm version](https://img.shields.io/npm/v/init-backend-project.svg)](https://www.npmjs.com/package/init-backend-project)
+[![npm downloads](https://img.shields.io/npm/dm/init-backend-project.svg)](https://www.npmjs.com/package/init-backend-project)
+[![source](https://img.shields.io/badge/source-GitHub-181717.svg)](https://github.com/chochkimhour/init-backend-project)
+[![cli](https://img.shields.io/badge/CLI-init--backend--project-0ea5e9.svg)](https://www.npmjs.com/package/init-backend-project)
+[![license](https://img.shields.io/npm/l/init-backend-project.svg)](LICENSE)
 
-`init-backend-project` helps you generate a clean backend starter with a framework, language, database, authentication, validation, Docker, linting, and testing choices selected interactively in your terminal.
+A professional CLI for creating clean, runnable backend starter projects in JavaScript or TypeScript.
 
-## Usage
+`init-backend-project` helps you start a backend project with a practical structure, ready-to-run code, framework templates, environment setup, health checks, error handling, and optional tools such as Docker, testing, linting, authentication, validation, and databases.
 
-Run with npx:
+## Why Use It
 
-```bash
-npx init-backend-project
-```
+- Start a backend project in seconds instead of creating folders and config files manually.
+- Choose the stack you want through simple terminal prompts.
+- Generate code that already runs, including an app entry point, server file, routes, controllers, services, middleware, and a health endpoint.
+- Keep project structure consistent across Node.js, Express, Fastify, and NestJS projects.
+- Add common production-friendly options only when you need them.
 
-Or with npm exec:
+## Quick Start
 
-```bash
-npm exec init-backend-project
-```
-
-You can also pass the project name up front:
+Create a new backend project:
 
 ```bash
 npx init-backend-project my-api
 ```
 
-## Supported Frameworks
-
-- Express
-- Fastify
-- NestJS
-- Node.js
-
-## Supported Languages
-
-- JavaScript
-- TypeScript
-
-NestJS projects are generated as TypeScript projects.
-
-## Features
-
-- Interactive terminal prompts
-- npm package name validation
-- Existing folder overwrite confirmation
-- Framework-specific templates
-- Health check endpoint at `GET /health`
-- CORS support
-- JSON request body support
-- Environment variables with dotenv or Nest config
-- Request logging
-- Global error handling
-- 404 handling
-- Optional Docker files
-- Optional ESLint and Prettier
-- Optional Jest or Vitest setup
-- Optional Git initialization
-- Optional dependency installation
-- Project README generation
-
-## CLI Options
-
-The CLI asks for:
-
-- Project name
-- Language: JavaScript or TypeScript
-- Backend framework: Express, Fastify, or NestJS
-- Package manager: npm, yarn, or pnpm
-- Database: None, PostgreSQL, MySQL, MongoDB (NoSQL), or Redis
-- ORM: None, Prisma, TypeORM, or Mongoose
-- Authentication: None, JWT Auth, or Session Auth
-- API documentation: None or Swagger / OpenAPI
-- Validation: None, Zod, Joi, or class-validator for NestJS
-- Docker inclusion
-- ESLint and Prettier inclusion
-- Testing setup: None, Jest, or Vitest
-- Git initialization
-- Dependency installation
-
-## Generated Project Structure
-
-Node.js, Express, and Fastify JavaScript projects:
-
-```text
-project-name/
-  src/
-    config/
-    controllers/
-    routes/
-    middlewares/
-    services/
-    utils/
-    app.js
-    server.js
-  .env.example
-  .gitignore
-  package.json
-  README.md
-```
-
-Node.js, Express, and Fastify TypeScript projects:
-
-```text
-project-name/
-  src/
-    config/
-    controllers/
-    routes/
-    middlewares/
-    services/
-    utils/
-    types/
-    app.ts
-    server.ts
-  .env.example
-  .gitignore
-  tsconfig.json
-  package.json
-  README.md
-```
-
-NestJS projects:
-
-```text
-project-name/
-  src/
-    common/
-      filters/
-      interceptors/
-      decorators/
-      dto/
-    config/
-    modules/
-      health/
-    app.module.ts
-    main.ts
-  .env.example
-  .gitignore
-  nest-cli.json
-  tsconfig.json
-  package.json
-  README.md
-```
-
-## Example Output
-
-After generation:
+Open the generated project:
 
 ```bash
 cd my-api
+```
+
+Install dependencies if you did not select automatic installation:
+
+```bash
+npm install
+```
+
+Run the backend:
+
+```bash
 npm run dev
 ```
 
-The API will run at:
-
-```text
-http://localhost:3000
-```
-
-Health check:
+Open the health check endpoint:
 
 ```text
 http://localhost:3000/health
 ```
 
-Example health response:
+Example response:
 
 ```json
 {
@@ -173,53 +60,201 @@ Example health response:
 }
 ```
 
-## Development
+## Usage
 
-Install dependencies:
+Use any of these styles.
+
+Run with `npx`:
+
+```bash
+npx init-backend-project
+```
+
+Run with `npx` and pass the project name:
+
+```bash
+npx init-backend-project my-api
+```
+
+Run with `npm exec`:
+
+```bash
+npm exec init-backend-project
+```
+
+Install globally:
+
+```bash
+npm install -g init-backend-project
+```
+
+Then run it anywhere:
+
+```bash
+init-backend-project my-api
+```
+
+After the project is created:
+
+```bash
+cd my-api
+```
+
+Run with npm:
 
 ```bash
 npm install
-```
-
-Run the CLI locally:
-
-```bash
 npm run dev
 ```
 
-Build:
+Run with yarn:
 
 ```bash
-npm run build
+yarn install
+yarn dev
 ```
 
-## Publishing to npm
-
-Before publishing, make sure you are logged in:
+Run with pnpm:
 
 ```bash
-npm login
+pnpm install
+pnpm dev
 ```
 
-Then publish:
+## What It Creates
+
+The generated project includes real starter backend code, not an empty folder.
+
+Common files and folders:
+
+```text
+project-name/
+  src/
+    config/
+    controllers/
+    routes/
+    middlewares/
+    services/
+    utils/
+    app.js or app.ts
+    server.js or server.ts
+  .env.example
+  .gitignore
+  package.json
+  README.md
+```
+
+TypeScript projects also include:
+
+```text
+tsconfig.json
+src/types/
+```
+
+NestJS projects include a Nest-style structure:
+
+```text
+project-name/
+  src/
+    common/
+      decorators/
+      dto/
+      filters/
+      interceptors/
+    config/
+    modules/
+      health/
+    app.module.ts
+    main.ts
+  nest-cli.json
+  tsconfig.json
+  package.json
+  README.md
+```
+
+## Features
+
+- Interactive prompts for choosing your backend stack
+- Ready-to-run starter code with a health check endpoint
+- Clean project structure for routes, controllers, services, middleware, config, and utilities
+- JavaScript and TypeScript support
+- Node.js, Express, Fastify, and NestJS templates
+- Optional database, ORM, authentication, validation, testing, Docker, ESLint, and Prettier setup
+- Optional Git initialization and dependency installation
+- Generated `.env.example`, `.gitignore`, `package.json`, and project README
+
+## Supported Choices
+
+Frameworks:
+
+- Node.js
+- Express
+- Fastify
+- NestJS
+
+Languages:
+
+- JavaScript
+- TypeScript
+
+Package managers:
+
+- npm
+- yarn
+- pnpm
+
+Databases:
+
+- None
+- PostgreSQL
+- MySQL
+- MongoDB
+- Redis
+
+ORMs:
+
+- None
+- Prisma
+- TypeORM
+- Mongoose
+
+Authentication:
+
+- None
+- JWT Auth
+- Session Auth
+
+Validation:
+
+- None
+- Zod
+- Joi
+- class-validator for NestJS
+
+Testing:
+
+- None
+- Jest
+- Vitest
+
+## Example Workflow
 
 ```bash
-npm publish
+npx init-backend-project my-api
+cd my-api
+npm run dev
 ```
 
-The package is configured with:
+Then visit:
 
-```json
-{
-  "bin": {
-    "init-backend-project": "dist/cli.js"
-  },
-  "files": ["dist", "templates", "README.md", "LICENSE"]
-}
+```text
+http://localhost:3000/health
 ```
 
-`prepublishOnly` runs the TypeScript build before publishing.
+That is enough to confirm the generated backend is running.
 
 ## License
 
-MIT
+MIT License.
+
+Copyright (c) 2026 Choch Kimhour.

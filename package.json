@@ -29,7 +29,7 @@
     "nestjs",
     "typescript"
   ],
-  "author": "",
+  "author": "Choch Kimhour",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
