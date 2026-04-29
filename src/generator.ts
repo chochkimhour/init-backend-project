@@ -208,7 +208,7 @@ function addFrameworkDependencies(options: ProjectOptions, dependencySet: Depend
       "reflect-metadata",
       "rxjs"
     ]);
-    addDependencies(devDependencies, ["@nestjs/cli", "@nestjs/schematics"]);
+    addDependencies(devDependencies, ["@nestjs/cli", "@nestjs/schematics", "@types/express"]);
   }
 }
 
@@ -448,6 +448,14 @@ function getPackageManagerRuntime(packageManager: ProjectOptions["packageManager
 
 async function writeLintingFiles(options: ProjectOptions) {
   const isTs = isTypeScriptProject(options);
+  const nodeGlobals = `{
+      Buffer: "readonly",
+      console: "readonly",
+      module: "readonly",
+      process: "readonly",
+      require: "readonly",
+      __dirname: "readonly"
+    }`;
   const config = isTs
     ? `import js from "@eslint/js";
 import tseslint from "typescript-eslint";
@@ -456,7 +464,15 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores: ["dist", "coverage", "node_modules"]
+    ignores: ["dist", "coverage", "node_modules", "eslint.config.*"]
+  },
+  {
+    languageOptions: {
+      globals: ${nodeGlobals}
+    },
+    rules: {
+      "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }]
+    }
   }
 );
 `
@@ -465,10 +481,14 @@ export default tseslint.config(
 export default [
   js.configs.recommended,
   {
-    ignores: ["dist", "coverage", "node_modules"],
+    ignores: ["dist", "coverage", "node_modules", "eslint.config.*"],
     languageOptions: {
       ecmaVersion: "latest",
-      sourceType: "commonjs"
+      sourceType: "commonjs",
+      globals: ${nodeGlobals}
+    },
+    rules: {
+      "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }]
     }
   }
 ];
@@ -673,16 +693,16 @@ function printSuccessMessage(options: ProjectOptions) {
   commands.push(getRunScriptCommand(options.packageManager, devScript));
 
   logger.plain("");
-  logger.success(chalk.bold(`✔ Project created successfully: ${options.projectName}`));
+  logger.success(chalk.bold(`Project created successfully: ${options.projectName}`));
   logger.plain("");
 
   logger.plain("- Next steps");
-  logger.plain("--------------");
+  logger.plain("-----------------");
   commands.forEach((command) => logger.plain(`  ${command}`));
   logger.plain("");
 
   logger.plain("- API endpoints");
-  logger.plain("--------------");
+  logger.plain("-----------------");
   logger.plain("  Local API:    http://localhost:3000");
   logger.plain("  Health check: http://localhost:3000/health");
   logger.plain("");

@@ -11,7 +11,8 @@ async function handleRoutes(req, res) {
   }
 
   if (req.url === "/health" && req.method === "GET") {
-    return healthRoutes(req, res);
+    await healthRoutes(req, res);
+    return true;
   }
 
   return false;

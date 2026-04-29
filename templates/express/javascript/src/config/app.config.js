@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 
 const appConfig = {
   env: process.env.NODE_ENV || "development",
