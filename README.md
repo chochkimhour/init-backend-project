@@ -1,8 +1,8 @@
 # init-backend-project
 
 [![npm](https://img.shields.io/badge/npm-init--backend--project-cb3837)](https://www.npmjs.com/package/init-backend-project)
-[![version](https://img.shields.io/badge/version-1.0.0-blue)](https://www.npmjs.com/package/init-backend-project)
-[![downloads](https://img.shields.io/npm/dm/init-backend-project?label=downloads&color=0ea5e9)](https://www.npmjs.com/package/init-backend-project)
+[![version](https://img.shields.io/npm/v/init-backend-project?label=version&color=blue)](https://www.npmjs.com/package/init-backend-project)
+[![downloads](https://img.shields.io/badge/downloads-npm-0ea5e9)](https://www.npmjs.com/package/init-backend-project)
 [![source](https://img.shields.io/badge/source-GitHub-181717)](https://github.com/chochkimhour/init-backend-project)
 [![CI](https://github.com/chochkimhour/init-backend-project/actions/workflows/ci.yml/badge.svg)](https://github.com/chochkimhour/init-backend-project/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
@@ -21,11 +21,13 @@ A professional backend project generator for creating clean, runnable Node.js, E
 
 ## Quick Start
 
-Create a new backend project:
+Create a new backend project with `npx`:
 
 ```bash
 npx init-backend-project my-api
 ```
+
+`npm install init-backend-project` only installs the package into an existing project. It does not create a new backend app. To generate a project, use `npx`, `npm exec`, or install the CLI globally.
 
 Open the generated project:
 
@@ -65,7 +67,13 @@ Example response:
 
 Use any of these styles.
 
-Run with `npx`:
+Recommended:
+
+```bash
+npx init-backend-project my-api
+```
+
+Run the interactive CLI without a project name:
 
 ```bash
 npx init-backend-project
@@ -83,6 +91,12 @@ Run with `npm exec`:
 npm exec init-backend-project
 ```
 
+Run with `npm exec` and pass the project name:
+
+```bash
+npm exec init-backend-project my-api
+```
+
 Install globally:
 
 ```bash
@@ -93,6 +107,13 @@ Then run it anywhere:
 
 ```bash
 init-backend-project my-api
+```
+
+Local install style:
+
+```bash
+npm install init-backend-project
+npx init-backend-project my-api
 ```
 
 After the project is created:

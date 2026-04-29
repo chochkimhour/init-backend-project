@@ -6,7 +6,15 @@ import { promptForProjectOptions } from "./prompts.js";
 import { logger } from "./utils/logger.js";
 const program = new Command();
 const CLI_NAME = "init-backend-project";
-const CLI_VERSION = "1.0.0";
+const CLI_VERSION = "1.0.1";
+const CLI_HEADER = String.raw `
+ _       _ _     _                _                  _                   _           _
+(_)_ __ (_) |_  | |__   __ _  ___| | _____ _ __   __| |  _ __  _ __ ___ (_) ___  ___| |_
+| | '_ \| | __| | '_ \ / _\` |/ __| |/ / _ \ '_ \ / _\` | | '_ \| '__/ _ \| |/ _ \/ __| __|
+| | | | | | |_  | |_) | (_| | (__|   <  __/ | | | (_| | | |_) | | | (_) | |  __/ (__| |_
+|_|_| |_|_|\__| |_.__/ \__,_|\___|_|\_\___|_| |_|\__,_| | .__/|_|  \___// |\___|\___|\__|
+                                                        |_|          |__/
+`;
 program
     .name(CLI_NAME)
     .description("Create a professional backend starter project.")
@@ -14,7 +22,7 @@ program
     .version(CLI_VERSION)
     .action(async (projectName) => {
     try {
-        logger.plain(chalk.bold(`\n${CLI_NAME}\n`));
+        logger.plain(chalk.cyan(CLI_HEADER));
         const options = await promptForProjectOptions(projectName);
         await generateProject(options);
     }
