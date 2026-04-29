@@ -14,11 +14,7 @@ const CLI_HEADER = String.raw ` _       _ _     _                _              
 |_|_| |_|_|\__| |_.__/ \__,_|\___|_|\_\___|_| |_|\__,_| | .__/|_|  \___// |\___|\___|\__|
                                                         |_|          |__/`;
 function colorizeHeader(header) {
-    const colors = [chalk.cyanBright, chalk.blueBright, chalk.magentaBright, chalk.greenBright];
-    return header
-        .split("\n")
-        .map((line, index) => colors[index % colors.length](line))
-        .join("\n");
+    return chalk.hex("#f97316").bold(header);
 }
 program
     .name(CLI_NAME)
