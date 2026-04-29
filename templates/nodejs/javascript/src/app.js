@@ -14,7 +14,7 @@ async function app(req, res) {
       return;
     }
 
-    logger.info(`${req.method} ${req.url}`);
+    logger.info(`[{{PROJECT_NAME}}] ${req.method} ${req.url}`);
     req.body = await parseJsonBody(req);
 
     const handled = await handleRoutes(req, res);

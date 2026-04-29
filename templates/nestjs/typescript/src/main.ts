@@ -17,7 +17,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseInterceptor());
 
   await app.listen(port);
-  Logger.log(`{{PROJECT_NAME}} API running on http://localhost:${port}`, "Bootstrap");
+  Logger.log(`[{{PROJECT_NAME}}] API running on http://localhost:${port}`, "Bootstrap");
 }
 
 void bootstrap();

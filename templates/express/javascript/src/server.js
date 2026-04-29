@@ -3,5 +3,5 @@ const { appConfig } = require("./config/app.config");
 const { logger } = require("./utils/logger");
 
 app.listen(appConfig.port, () => {
-  logger.info(`{{PROJECT_NAME}} API running on http://localhost:${appConfig.port}`);
+  logger.info(`[{{PROJECT_NAME}}] API running on http://localhost:${appConfig.port}`);
 });

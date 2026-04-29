@@ -6,5 +6,5 @@ import { logger } from "./utils/logger.js";
 const server = http.createServer(app);
 
 server.listen(appConfig.port, () => {
-  logger.info(`{{PROJECT_NAME}} API running on http://localhost:${appConfig.port}`);
+  logger.info(`[{{PROJECT_NAME}}] API running on http://localhost:${appConfig.port}`);
 });
