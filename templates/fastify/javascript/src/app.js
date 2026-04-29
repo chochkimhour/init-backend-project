@@ -1,9 +1,9 @@
 const Fastify = require("fastify");
 const cors = require("@fastify/cors");
 const { appConfig } = require("./config/app.config");
-const registerRoutes = require("./routes");
-const { registerErrorHandler } = require("./middlewares/error.middleware");
-const { registerNotFoundHandler } = require("./middlewares/not-found.middleware");
+const { registerRoutes } = require("./modules");
+const { registerErrorHandler } = require("./common/plugins/error-handler.plugin");
+const { registerNotFoundHandler } = require("./common/plugins/not-found.plugin");
 
 async function buildApp() {
   const app = Fastify({

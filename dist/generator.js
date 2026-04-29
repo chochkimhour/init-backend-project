@@ -305,11 +305,32 @@ function createGitignore() {
 dist
 coverage
 .env
-.DS_Store
+.env.*
+!.env.example
+.cache/
+.turbo/
+.vite/
+.next/
+.eslintcache
+*.tsbuildinfo
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
+.pnpm-store/
+.npm/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
 `;
 }
 async function writeDockerFiles(options) {
@@ -502,11 +523,15 @@ ${buildCommand}
 
 \`\`\`text
 src/
+  common/
+    http/        # Express and Node.js response helpers
+    plugins/     # Fastify app plugins
+    middlewares/ # Express and Node.js middleware
+    utils/
   config/
-  controllers or modules/
-  middlewares or common/
-  services/
-  app/main entrypoint
+  modules/
+    health/
+  app/server entrypoint
 \`\`\`
 
 ## Scripts
@@ -573,7 +598,9 @@ function getRunScriptCommand(packageManager, script) {
 function printSuccessMessage(options) {
     const devScript = options.framework === "nestjs" ? "start:dev" : "dev";
     const commands = [`cd ${options.projectName}`];
-    commands.push(getInstallCommand(options.packageManager));
+    if (!options.installDependencies) {
+        commands.push(getInstallCommand(options.packageManager));
+    }
     commands.push(getRunScriptCommand(options.packageManager, devScript));
     logger.plain("");
     logger.success(chalk.bold(`Project created successfully: ${options.projectName}`));

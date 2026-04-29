@@ -1,9 +1,9 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { appConfig } from "./config/app.config.js";
-import { registerRoutes } from "./routes/index.js";
-import { registerErrorHandler } from "./middlewares/error.middleware.js";
-import { registerNotFoundHandler } from "./middlewares/not-found.middleware.js";
+import { registerRoutes } from "./modules/index.js";
+import { registerErrorHandler } from "./common/plugins/error-handler.plugin.js";
+import { registerNotFoundHandler } from "./common/plugins/not-found.plugin.js";
 
 export async function buildApp() {
   const app = Fastify({
