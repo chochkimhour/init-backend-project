@@ -6,8 +6,9 @@ export class AppController {
   getRoot() {
     return {
       success: true,
-      message: "{{PROJECT_NAME}} API is running",
+      message: "{{PROJECT_NAME}} NestJS API is running",
       service: "{{PROJECT_NAME}}",
+      framework: "NestJS",
       health: "/health"
     };
   }

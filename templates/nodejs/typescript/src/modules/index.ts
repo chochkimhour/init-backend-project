@@ -4,8 +4,9 @@ import { healthRoutes } from "./health/health.routes.js";
 
 export async function handleRoutes(req: IncomingMessage, res: ServerResponse) {
   if (req.url === "/" && req.method === "GET") {
-    successResponse(res, "{{PROJECT_NAME}} API is running", {
+    successResponse(res, "{{PROJECT_NAME}} Node.js API is running", {
       service: "{{PROJECT_NAME}}",
+      framework: "Node.js",
       health: "/health"
     });
     return true;

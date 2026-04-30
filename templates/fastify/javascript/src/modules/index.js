@@ -3,8 +3,9 @@ const healthRoutes = require("./health/health.routes");
 async function registerRoutes(app) {
   app.get("/", async () => ({
     success: true,
-    message: "{{PROJECT_NAME}} API is running",
+    message: "{{PROJECT_NAME}} Fastify API is running",
     service: "{{PROJECT_NAME}}",
+    framework: "Fastify",
     health: "/health"
   }));
 

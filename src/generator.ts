@@ -465,36 +465,184 @@ Thumbs.db
 async function writeDockerFiles(options: ProjectOptions) {
   const isTs = isTypeScriptProject(options);
   const runtime = getPackageManagerRuntime(options.packageManager);
-  const startCommand =
-    isTs
-        ? `${runtime.run} build && ${runtime.run} start`
-        : `${runtime.run} start`;
+  const buildCommand = isTs ? `RUN ${runtime.run} build` : "";
+  const appArtifact = isTs ? "dist" : "src";
+  const copyPackageFilesCommand = getPackageFileCopyCommand(options.packageManager);
 
-  await fs.writeFile(
-    path.join(options.targetDirectory, "Dockerfile"),
-    `FROM node:22-alpine
+  await Promise.all([
+    fs.writeFile(
+      path.join(options.targetDirectory, "Dockerfile"),
+      `FROM node:22-alpine AS build
 
 WORKDIR /app
 
-COPY package*.json ./
+${copyPackageFilesCommand}
 ${runtime.prepareCommand ? `${runtime.prepareCommand}\n` : ""}RUN ${runtime.installCommand}
 
 COPY . .
+${buildCommand}
 
+FROM node:22-alpine AS production
+
+ENV NODE_ENV=production
+WORKDIR /app
+
+${copyPackageFilesCommand}
+${runtime.prepareCommand ? `${runtime.prepareCommand}\n` : ""}RUN ${runtime.productionInstallCommand}
+COPY --from=build /app/${appArtifact} ./${appArtifact}
+
+USER node
 EXPOSE 3000
-CMD ["sh", "-c", "${startCommand}"]
+CMD ["sh", "-c", "${runtime.run} start"]
 `
-  );
+    ),
 
-  await fs.writeFile(
-    path.join(options.targetDirectory, ".dockerignore"),
-    `node_modules
+    fs.writeFile(
+      path.join(options.targetDirectory, ".dockerignore"),
+      `node_modules
 dist
 coverage
 .env
 .git
 `
-  );
+    ),
+
+    fs.writeFile(path.join(options.targetDirectory, "docker-compose.yml"), createDockerCompose(options))
+  ]);
+}
+
+function createDockerCompose(options: ProjectOptions) {
+  const databaseService = createComposeDatabaseService(options);
+  const databaseUrl = getComposeDatabaseUrl(options);
+  const apiEnvironment = [
+    "NODE_ENV=production",
+    "PORT=3000",
+    "CORS_ORIGIN=*",
+    ...(databaseUrl ? [`DATABASE_URL=${databaseUrl}`] : [])
+  ];
+  const dependsOn = databaseService ? `    depends_on:
+      - ${databaseService.name}
+` : "";
+
+  return `services:
+  api:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+${apiEnvironment.map((line) => `      - ${line}`).join("\n")}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+${dependsOn}${databaseService ? `\n${databaseService.definition}` : ""}`;
+}
+
+function createComposeDatabaseService(options: ProjectOptions) {
+  if (options.database === "postgresql") {
+    return {
+      name: "postgres",
+      definition: `  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+`
+    };
+  }
+
+  if (options.database === "mysql") {
+    return {
+      name: "mysql",
+      definition: `  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: app
+      MYSQL_USER: app
+      MYSQL_PASSWORD: app
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
+`
+    };
+  }
+
+  if (options.database === "mongodb") {
+    return {
+      name: "mongodb",
+      definition: `  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
+`
+    };
+  }
+
+  if (options.database === "redis") {
+    return {
+      name: "redis",
+      definition: `  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
+`
+    };
+  }
+
+  return null;
+}
+
+function getComposeDatabaseUrl(options: ProjectOptions) {
+  if (options.database === "postgresql") {
+    return "postgresql://app:app@postgres:5432/app";
+  }
+
+  if (options.database === "mysql") {
+    return "mysql://app:app@mysql:3306/app";
+  }
+
+  if (options.database === "mongodb") {
+    return "mongodb://mongodb:27017/app";
+  }
+
+  if (options.database === "redis") {
+    return "redis://redis:6379";
+  }
+
+  return "";
+}
+
+function getPackageFileCopyCommand(packageManager: ProjectOptions["packageManager"]) {
+  return packageManager === "npm" ? "COPY package*.json ./" : "COPY package.json ./";
 }
 
 function getPackageManagerRuntime(packageManager: ProjectOptions["packageManager"]) {
@@ -502,6 +650,7 @@ function getPackageManagerRuntime(packageManager: ProjectOptions["packageManager
     return {
       prepareCommand: "RUN corepack enable",
       installCommand: "yarn install --prefer-offline",
+      productionInstallCommand: "yarn install --production --prefer-offline",
       run: "yarn"
     };
   }
@@ -510,6 +659,7 @@ function getPackageManagerRuntime(packageManager: ProjectOptions["packageManager
     return {
       prepareCommand: "RUN corepack enable",
       installCommand: "pnpm install --prefer-offline",
+      productionInstallCommand: "pnpm install --prod --prefer-offline",
       run: "pnpm"
     };
   }
@@ -517,6 +667,7 @@ function getPackageManagerRuntime(packageManager: ProjectOptions["packageManager
   return {
     prepareCommand: "",
     installCommand: "npm install --no-audit --no-fund --prefer-offline",
+    productionInstallCommand: "npm install --omit=dev --no-audit --no-fund --prefer-offline",
     run: "npm run"
   };
 }
@@ -628,6 +779,7 @@ function createProjectReadme(options: ProjectOptions) {
   const buildCommand = `${options.packageManager} run build`;
   const installCommand = getInstallCommand(options.packageManager);
   const scripts = getGeneratedScriptDescriptions(options);
+  const dockerSection = createDockerReadmeSection(options);
 
   return `# ${options.projectName}
 
@@ -661,6 +813,7 @@ ${devCommand}
 \`\`\`
 
 The API runs at \`http://localhost:3000\`.
+${dockerSection}
 
 ## Build
 
@@ -695,6 +848,28 @@ ${scripts.map((script) => `- \`${script.name}\` - ${script.description}`).join("
 ## License
 
 MIT
+`;
+}
+
+function createDockerReadmeSection(options: ProjectOptions) {
+  if (!options.includeDocker) {
+    return "";
+  }
+
+  const databaseNote =
+    options.database === "none"
+      ? ""
+      : `\n\nThe Docker Compose setup includes ${formatLabel(options.database)} and configures \`DATABASE_URL\` for the API service.`;
+
+  return `
+
+## Docker
+
+\`\`\`bash
+docker compose up --build
+\`\`\`
+
+The API container is available at \`http://localhost:3000\`.${databaseNote}
 `;
 }
 
@@ -786,6 +961,12 @@ function printSuccessMessage(options: ProjectOptions) {
   logger.plain("    Local API:    http://localhost:3000");
   logger.plain("    Health check: http://localhost:3000/health");
   logger.plain("");
+
+  if (options.includeDocker) {
+    logger.plain("- Docker");
+    logger.plain("    docker compose up --build");
+    logger.plain("");
+  }
 
   logger.plain("-------------------------------------------------------------");
   logger.info(chalk.bold("Generated by init-backend-project | Created by Choch Kimhour."));

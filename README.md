@@ -9,7 +9,7 @@
 
 Create clean, runnable backend starter projects for Node.js, Express, Fastify, and NestJS with one interactive CLI.
 
-`init-backend-project` generates real starter code with framework-specific app startup, a health endpoint, environment config, consistent response helpers, error handling, and optional setup for Docker, testing, linting, validation, authentication, databases, and ORMs.
+`init-backend-project` generates real starter code with framework-specific app startup, a health endpoint, environment config, consistent response helpers, error handling, and optional setup for Docker Compose, testing, linting, validation, authentication, databases, and ORMs.
 
 ## Requirements
 
@@ -200,7 +200,7 @@ Testing:
 
 Optional tools:
 
-- Docker
+- Docker and Docker Compose
 - ESLint and Prettier
 - Git initialization
 - Dependency installation
@@ -276,14 +276,14 @@ $ npx init-backend-project
 > 1. None
   2. Zod
   3. Joi
-? Include Docker? No
-? Include ESLint and Prettier? Yes
+? Include Docker and Docker Compose? (Yes/No) No
+? Include ESLint and Prettier? (Yes/No) Yes
 ? Include testing setup?
 > 1. None
   2. Jest
   3. Vitest
-? Initialize Git? No
-? Install dependencies after generation? Yes
+? Initialize Git repository? (Yes/No) No
+? Install dependencies after generation? (Yes/No) Yes
 Project files created.
 Dependencies installed.
 
