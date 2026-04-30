@@ -18,6 +18,7 @@ async function bootstrap() {
 
   await app.listen(port);
   Logger.log(`[{{PROJECT_NAME}}] NestJS API running on http://localhost:${port}`, "Bootstrap");
+  Logger.log(`[{{PROJECT_NAME}}] Health check: http://localhost:${port}/health`, "Bootstrap");
 }
 
 void bootstrap();

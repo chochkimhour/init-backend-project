@@ -1,4 +1,4 @@
-# init-backend-project
+﻿# init-backend-project
 
 [![npm](https://img.shields.io/badge/npm-init--backend--project-cb3837)](https://www.npmjs.com/package/init-backend-project)
 [![version](https://img.shields.io/npm/v/init-backend-project?label=version&color=blue)](https://www.npmjs.com/package/init-backend-project)
@@ -221,6 +221,13 @@ yarn dev
 pnpm dev
 ```
 
+When the server starts, the terminal prints the framework and health check URLs:
+
+```text
+[my-api] Express API running on http://localhost:3000
+[my-api] Health check: http://localhost:3000/health
+```
+
 Build TypeScript projects:
 
 ```bash
@@ -276,14 +283,22 @@ $ npx init-backend-project
 > 1. None
   2. Zod
   3. Joi
-? Include Docker and Docker Compose? (Yes/No) No
-? Include ESLint and Prettier? (Yes/No) Yes
+? Include Docker and Docker Compose? (Yes/No)
+  Yes
+> No
+? Include ESLint and Prettier? (Yes/No)
+> Yes
+  No
 ? Include testing setup?
 > 1. None
   2. Jest
   3. Vitest
-? Initialize Git repository? (Yes/No) No
-? Install dependencies after generation? (Yes/No) Yes
+? Initialize Git repository? (Yes/No)
+  Yes
+> No
+? Install dependencies after generation? (Yes/No)
+> Yes
+  No
 Project files created.
 Dependencies installed.
 
@@ -291,6 +306,8 @@ Project created successfully: my-backend
 
 - Next steps
     cd my-backend
+
+- Run locally
     npm run dev
 
 - API endpoints
