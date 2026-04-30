@@ -1,8 +1,8 @@
-const { handleRoutes } = require("./routes");
-const { errorMiddleware } = require("./middlewares/error.middleware");
-const { notFoundMiddleware } = require("./middlewares/not-found.middleware");
+const { handleRoutes } = require("./modules");
+const { errorMiddleware } = require("./common/middlewares/error.middleware");
+const { notFoundMiddleware } = require("./common/middlewares/not-found.middleware");
 const { appConfig } = require("./config/app.config");
-const { logger } = require("./utils/logger");
+const { logger } = require("./common/utils/logger");
 
 async function app(req, res) {
   try {

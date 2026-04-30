@@ -1,9 +1,9 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { handleRoutes } from "./routes/index.js";
-import { errorMiddleware } from "./middlewares/error.middleware.js";
-import { notFoundMiddleware } from "./middlewares/not-found.middleware.js";
+import { handleRoutes } from "./modules/index.js";
+import { errorMiddleware } from "./common/middlewares/error.middleware.js";
+import { notFoundMiddleware } from "./common/middlewares/not-found.middleware.js";
 import { appConfig } from "./config/app.config.js";
-import { logger } from "./utils/logger.js";
+import { logger } from "./common/utils/logger.js";
 
 export async function app(req: IncomingMessage & { body?: unknown }, res: ServerResponse) {
   try {

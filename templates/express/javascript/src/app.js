@@ -1,10 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
-const routes = require("./routes");
+const routes = require("./modules");
 const { appConfig } = require("./config/app.config");
-const { errorMiddleware } = require("./middlewares/error.middleware");
-const { notFoundMiddleware } = require("./middlewares/not-found.middleware");
+const { errorMiddleware } = require("./common/middlewares/error.middleware");
+const { notFoundMiddleware } = require("./common/middlewares/not-found.middleware");
 
 const app = express();
 

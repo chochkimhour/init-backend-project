@@ -33,6 +33,57 @@ type DependencySet = {
   devDependencies: Set<string>;
 };
 
+const DEPENDENCY_VERSIONS: Record<string, string> = {
+  "@eslint/js": "9.39.1",
+  "@fastify/cors": "11.1.0",
+  "@nestjs/common": "11.1.8",
+  "@nestjs/config": "4.0.2",
+  "@nestjs/core": "11.1.8",
+  "@nestjs/platform-express": "11.1.8",
+  "@nestjs/swagger": "11.2.1",
+  "@prisma/client": "6.19.0",
+  "@types/bcryptjs": "2.4.6",
+  "@types/cors": "2.8.19",
+  "@types/express": "5.0.5",
+  "@types/jest": "30.0.0",
+  "@types/jsonwebtoken": "9.0.10",
+  "@types/morgan": "1.9.10",
+  "@types/node": "22.19.1",
+  "@types/swagger-jsdoc": "6.0.4",
+  "@types/swagger-ui-express": "4.1.8",
+  "bcryptjs": "3.0.3",
+  "class-transformer": "0.5.1",
+  "class-validator": "0.14.2",
+  "cors": "2.8.5",
+  "dotenv": "16.6.1",
+  "eslint": "9.39.1",
+  "express": "5.1.0",
+  "fastify": "5.6.2",
+  "jest": "30.2.0",
+  "joi": "18.0.2",
+  "jsonwebtoken": "9.0.2",
+  "mongodb": "6.21.0",
+  "mongoose": "8.20.0",
+  "morgan": "1.10.1",
+  "mysql2": "3.15.3",
+  "nodemon": "3.1.11",
+  "pg": "8.16.3",
+  "prettier": "3.6.2",
+  "prisma": "6.19.0",
+  "redis": "5.10.0",
+  "reflect-metadata": "0.2.2",
+  "rxjs": "7.8.2",
+  "swagger-jsdoc": "6.2.8",
+  "swagger-ui-express": "5.0.1",
+  "ts-jest": "29.4.5",
+  "tsx": "4.20.6",
+  "typeorm": "0.3.27",
+  "typescript": "5.9.3",
+  "typescript-eslint": "8.48.0",
+  "vitest": "3.2.4",
+  "zod": "3.25.76"
+};
+
 export async function generateProject(options: ProjectOptions) {
   if (await fs.pathExists(options.targetDirectory)) {
     if (!options.overwrite) {
@@ -182,21 +233,17 @@ function addFrameworkDependencies(options: ProjectOptions, dependencySet: Depend
 
   if (options.framework === "express") {
     addDependencies(dependencies, ["express", "cors", "dotenv", "morgan"]);
-    isTs ? addDependencies(devDependencies, ["@types/express", "@types/cors", "@types/morgan"]) : devDependencies.add("nodemon");
+    if (isTs) {
+      addDependencies(devDependencies, ["@types/express", "@types/cors", "@types/morgan"]);
+    }
   }
 
   if (options.framework === "nodejs") {
     dependencies.add("dotenv");
-    if (!isTs) {
-      devDependencies.add("nodemon");
-    }
   }
 
   if (options.framework === "fastify") {
     addDependencies(dependencies, ["fastify", "@fastify/cors", "dotenv"]);
-    if (!isTs) {
-      devDependencies.add("nodemon");
-    }
   }
 
   if (options.framework === "nestjs") {
@@ -208,7 +255,7 @@ function addFrameworkDependencies(options: ProjectOptions, dependencySet: Depend
       "reflect-metadata",
       "rxjs"
     ]);
-    addDependencies(devDependencies, ["@nestjs/cli", "@nestjs/schematics", "@types/express"]);
+    devDependencies.add("@types/express");
   }
 }
 
@@ -288,10 +335,16 @@ function addToolingDependencies(options: ProjectOptions, dependencySet: Dependen
 
   if (isTs) {
     addDependencies(devDependencies, ["typescript", "tsx", "@types/node"]);
+  } else {
+    devDependencies.add("nodemon");
   }
 
   if (options.includeLinting) {
-    addDependencies(devDependencies, ["eslint", "prettier", "@eslint/js", "typescript-eslint"]);
+    addDependencies(devDependencies, ["eslint", "prettier", "@eslint/js"]);
+
+    if (isTs) {
+      devDependencies.add("typescript-eslint");
+    }
   }
 
   if (options.testing === "jest") {
@@ -310,9 +363,10 @@ function createScripts(options: ProjectOptions) {
   const scripts: Record<string, string> = {};
 
   if (options.framework === "nestjs") {
-    scripts.start = "nest start";
-    scripts["start:dev"] = "nest start --watch";
-    scripts.build = "nest build";
+    scripts.dev = "tsx watch src/main.ts";
+    scripts["start:dev"] = "tsx watch src/main.ts";
+    scripts.build = "tsc";
+    scripts.start = "node dist/main.js";
   } else if (isTypeScriptProject(options)) {
     scripts.dev = "tsx watch src/server.ts";
     scripts.build = "tsc";
@@ -347,7 +401,9 @@ function isTypeScriptProject(options: ProjectOptions) {
 }
 
 function toVersionMap(dependencies: Set<string>) {
-  return Object.fromEntries([...dependencies].sort().map((dependency) => [dependency, "latest"]));
+  return Object.fromEntries(
+    [...dependencies].sort().map((dependency) => [dependency, DEPENDENCY_VERSIONS[dependency] ?? "latest"])
+  );
 }
 
 async function writeJson(file: string, value: unknown) {
@@ -377,11 +433,32 @@ function createGitignore() {
 dist
 coverage
 .env
-.DS_Store
+.env.*
+!.env.example
+.cache/
+.turbo/
+.vite/
+.next/
+.eslintcache
+*.tsbuildinfo
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
+.pnpm-store/
+.npm/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
 `;
 }
 
@@ -389,9 +466,7 @@ async function writeDockerFiles(options: ProjectOptions) {
   const isTs = isTypeScriptProject(options);
   const runtime = getPackageManagerRuntime(options.packageManager);
   const startCommand =
-    options.framework === "nestjs"
-      ? `${runtime.run} start`
-      : isTs
+    isTs
         ? `${runtime.run} build && ${runtime.run} start`
         : `${runtime.run} start`;
 
@@ -426,7 +501,7 @@ function getPackageManagerRuntime(packageManager: ProjectOptions["packageManager
   if (packageManager === "yarn") {
     return {
       prepareCommand: "RUN corepack enable",
-      installCommand: "yarn install",
+      installCommand: "yarn install --prefer-offline",
       run: "yarn"
     };
   }
@@ -434,14 +509,14 @@ function getPackageManagerRuntime(packageManager: ProjectOptions["packageManager
   if (packageManager === "pnpm") {
     return {
       prepareCommand: "RUN corepack enable",
-      installCommand: "pnpm install",
+      installCommand: "pnpm install --prefer-offline",
       run: "pnpm"
     };
   }
 
   return {
     prepareCommand: "",
-    installCommand: "npm install",
+    installCommand: "npm install --no-audit --no-fund --prefer-offline",
     run: "npm run"
   };
 }
@@ -539,9 +614,9 @@ export default defineConfig({
 
 async function installDependencies(options: ProjectOptions) {
   const commands = {
-    npm: ["npm", ["install"]],
-    yarn: ["yarn", ["install"]],
-    pnpm: ["pnpm", ["install"]]
+    npm: ["npm", ["install", "--no-audit", "--no-fund", "--prefer-offline", "--loglevel=error"]],
+    yarn: ["yarn", ["install", "--prefer-offline"]],
+    pnpm: ["pnpm", ["install", "--prefer-offline"]]
   } as const;
 
   const [command, args] = commands[options.packageManager];
@@ -602,11 +677,15 @@ ${buildCommand}
 
 \`\`\`text
 src/
+  common/
+    http/        # Express and Node.js response helpers
+    plugins/     # Fastify app plugins
+    middlewares/ # Express and Node.js middleware
+    utils/
   config/
-  controllers or modules/
-  middlewares or common/
-  services/
-  app/main entrypoint
+  modules/
+    health/
+  app/server entrypoint
 \`\`\`
 
 ## Scripts
@@ -689,7 +768,10 @@ function printSuccessMessage(options: ProjectOptions) {
   const devScript = options.framework === "nestjs" ? "start:dev" : "dev";
   const commands = [`cd ${options.projectName}`];
 
-  commands.push(getInstallCommand(options.packageManager));
+  if (!options.installDependencies) {
+    commands.push(getInstallCommand(options.packageManager));
+  }
+
   commands.push(getRunScriptCommand(options.packageManager, devScript));
 
   logger.plain("");

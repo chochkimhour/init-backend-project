@@ -1,7 +1,7 @@
 const http = require("node:http");
 const { app } = require("./app");
 const { appConfig } = require("./config/app.config");
-const { logger } = require("./utils/logger");
+const { logger } = require("./common/utils/logger");
 
 const server = http.createServer(app);
 

@@ -1,4 +1,4 @@
-﻿# init-backend-project
+# init-backend-project
 
 [![npm](https://img.shields.io/badge/npm-init--backend--project-cb3837)](https://www.npmjs.com/package/init-backend-project)
 [![version](https://img.shields.io/npm/v/init-backend-project?label=version&color=blue)](https://www.npmjs.com/package/init-backend-project)
@@ -7,47 +7,34 @@
 [![CI passing](https://github.com/chochkimhour/init-backend-project/actions/workflows/ci.yml/badge.svg)](https://github.com/chochkimhour/init-backend-project/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-A professional backend project generator for creating clean, runnable Node.js, Express, Fastify, and NestJS starter projects in JavaScript or TypeScript.
+Create clean, runnable backend starter projects for Node.js, Express, Fastify, and NestJS with one interactive CLI.
 
-`init-backend-project` helps you start a backend project with a practical structure, ready-to-run code, framework templates, environment setup, health checks, error handling, and optional tools such as Docker, testing, linting, authentication, validation, and databases.
+`init-backend-project` generates real starter code with framework-specific app startup, a health endpoint, environment config, consistent response helpers, error handling, and optional setup for Docker, testing, linting, validation, authentication, databases, and ORMs.
 
-## Why Use It
+## Requirements
 
-- Start a backend project in seconds instead of creating folders and config files manually.
-- Choose the stack you want through simple terminal prompts.
-- Generate code that already runs, including an app entry point, server file, routes, controllers, services, middleware, and a health endpoint.
-- Keep project structure consistent across Node.js, Express, Fastify, and NestJS projects.
-- Add common production-friendly options only when you need them.
+- Node.js 18.17 or newer
+- npm, yarn, or pnpm
 
 ## Quick Start
 
-Create a new backend project with `npx`:
+Create a backend project:
 
 ```bash
 npx init-backend-project my-api
 ```
 
-`npm install init-backend-project` only installs the package into an existing project. It does not create a new backend app. To generate a project, use `npx`, `npm exec`, or install the CLI globally.
-
-Open the generated project:
+Open it and run the server:
 
 ```bash
 cd my-api
-```
-
-Install dependencies if you did not select automatic installation:
-
-```bash
 npm install
-```
-
-Run the backend:
-
-```bash
 npm run dev
 ```
 
-Open the health check endpoint:
+If you choose automatic dependency installation during setup, you can skip `npm install`.
+
+Open the health check:
 
 ```text
 http://localhost:3000/health
@@ -65,67 +52,188 @@ Example response:
 
 ## Usage
 
-Create a new backend project:
+Run with `npx`:
 
 ```bash
 npx init-backend-project my-api
 ```
 
-Or start the interactive CLI and enter the project name when prompted:
+Run the interactive prompt without a project name:
 
 ```bash
 npx init-backend-project
 ```
 
-You can also use `npm exec`:
+Use `npm exec`:
 
 ```bash
 npm exec init-backend-project my-api
 ```
 
-Use the CLI often? Install it globally:
+Install globally if you generate projects often:
 
 ```bash
 npm install -g init-backend-project
 init-backend-project my-api
 ```
 
-Global installation adds the `init-backend-project` command to your system, so you can create backend projects from any folder without using `npx` each time. Use this option if you plan to generate projects often.
+Note: `npm install init-backend-project` only installs this package into the current project. To create a new backend app, use `npx`, `npm exec`, or the global CLI command.
 
-The npm website may show this install command:
+## What It Generates
 
-```bash
-npm install init-backend-project
+Every generated project includes a practical backend foundation:
+
+- App and server entry points
+- Environment configuration
+- Health check endpoint
+- Centralized error and not-found handling
+- Consistent JSON response helpers
+- Feature-based module structure
+- Generated `.env.example`, `.gitignore`, `package.json`, and `README.md`
+
+Express, Fastify, and raw Node.js projects use this structure:
+
+```text
+project-name/
+  src/
+    common/
+      http/        # Express and Node.js response helpers
+      plugins/     # Fastify app plugins
+      middlewares/ # Express and Node.js middleware
+      utils/
+    config/
+    modules/
+      health/
+    app.js or app.ts
+    server.js or server.ts
+  .env.example
+  .gitignore
+  package.json
+  README.md
 ```
 
-That only installs the package into an existing project. To generate a new backend app, use `npx init-backend-project my-api`, `npm exec init-backend-project my-api`, or the global CLI command.
+TypeScript projects also include:
 
-After the project is created:
-
-```bash
-cd my-api
+```text
+tsconfig.json
+src/types/
 ```
 
-Run with your package manager:
+NestJS projects use a Nest-style structure:
+
+```text
+project-name/
+  src/
+    common/
+      decorators/
+      dto/
+      filters/
+      interceptors/
+    config/
+    modules/
+      health/
+    app.module.ts
+    main.ts
+  tsconfig.json
+  package.json
+  README.md
+```
+
+## Supported Choices
+
+Frameworks:
+
+- Node.js
+- Express
+- Fastify
+- NestJS
+
+Languages:
+
+- JavaScript
+- TypeScript
+
+Package managers:
+
+- npm
+- yarn
+- pnpm
+
+Databases:
+
+- None
+- PostgreSQL
+- MySQL
+- MongoDB
+- Redis
+
+ORMs:
+
+- None
+- Prisma
+- TypeORM
+- Mongoose
+
+Authentication:
+
+- None
+- JWT Auth
+- Session Auth
+
+API documentation:
+
+- None
+- Swagger / OpenAPI
+
+Validation:
+
+- None
+- Zod
+- Joi
+- class-validator for NestJS
+
+Testing:
+
+- None
+- Jest
+- Vitest
+
+Optional tools:
+
+- Docker
+- ESLint and Prettier
+- Git initialization
+- Dependency installation
+
+## Package Manager Commands
+
+Run the generated project with your selected package manager:
 
 ```bash
-npm install
 npm run dev
 ```
 
 ```bash
-yarn install
 yarn dev
 ```
 
 ```bash
-pnpm install
 pnpm dev
 ```
 
-## Example CLI Output
+Build TypeScript projects:
 
-Example when creating an Express project with npm. The banner is orange in supported terminals.
+```bash
+npm run build
+```
+
+NestJS projects also support the familiar alias:
+
+```bash
+npm run start:dev
+```
+
+## Example CLI Flow
 
 ```text
 $ npx init-backend-project
@@ -183,7 +291,6 @@ Project created successfully: my-backend
 
 - Next steps
     cd my-backend
-    npm install
     npm run dev
 
 - API endpoints
@@ -193,138 +300,6 @@ Project created successfully: my-backend
 -------------------------------------------------------------
 Generated by init-backend-project | Created by Choch Kimhour.
 ```
-
-## What It Creates
-
-The generated project includes real starter backend code, not an empty folder.
-
-Common files and folders:
-
-```text
-project-name/
-  src/
-    config/
-    controllers/
-    routes/
-    middlewares/
-    services/
-    utils/
-    app.js or app.ts
-    server.js or server.ts
-  .env.example
-  .gitignore
-  package.json
-  README.md
-```
-
-TypeScript projects also include:
-
-```text
-tsconfig.json
-src/types/
-```
-
-NestJS projects include a Nest-style structure:
-
-```text
-project-name/
-  src/
-    common/
-      decorators/
-      dto/
-      filters/
-      interceptors/
-    config/
-    modules/
-      health/
-    app.module.ts
-    main.ts
-  nest-cli.json
-  tsconfig.json
-  package.json
-  README.md
-```
-
-## Features
-
-- Interactive prompts for choosing your backend stack
-- Ready-to-run starter code with a health check endpoint
-- Clean project structure for routes, controllers, services, middleware, config, and utilities
-- JavaScript and TypeScript support
-- Node.js, Express, Fastify, and NestJS templates
-- Optional database, ORM, authentication, validation, testing, Docker, ESLint, and Prettier setup
-- Optional Git initialization and dependency installation
-- Generated `.env.example`, `.gitignore`, `package.json`, and project README
-
-## Supported Choices
-
-Frameworks:
-
-- Node.js
-- Express
-- Fastify
-- NestJS
-
-Languages:
-
-- JavaScript
-- TypeScript
-
-Package managers:
-
-- npm
-- yarn
-- pnpm
-
-Databases:
-
-- None
-- PostgreSQL
-- MySQL
-- MongoDB
-- Redis
-
-ORMs:
-
-- None
-- Prisma
-- TypeORM
-- Mongoose
-
-Authentication:
-
-- None
-- JWT Auth
-- Session Auth
-
-Validation:
-
-- None
-- Zod
-- Joi
-- class-validator for NestJS
-
-Testing:
-
-- None
-- Jest
-- Vitest
-
-## Example Workflow
-
-```bash
-npx init-backend-project my-api
-cd my-api
-npm run dev
-```
-
-Then visit:
-
-```text
-http://localhost:3000/health
-```
-
-That is enough to confirm the generated backend is running.
 
 ## License
 
