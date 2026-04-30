@@ -1,6 +1,6 @@
 import path from "node:path";
 import fs from "fs-extra";
-import { confirm, input, select } from "@inquirer/prompts";
+import { input, select } from "@inquirer/prompts";
 import { validateProjectName } from "./utils/validateProjectName.js";
 function numberedChoices(choices) {
     return choices.map((choice, index) => ({
@@ -10,8 +10,12 @@ function numberedChoices(choices) {
     }));
 }
 async function confirmYesNo(message, defaultValue = false) {
-    return confirm({
+    return select({
         message: `${message} (Yes/No)`,
+        choices: [
+            { name: "Yes", value: true, short: "Yes" },
+            { name: "No", value: false, short: "No" }
+        ],
         default: defaultValue
     });
 }

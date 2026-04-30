@@ -1,6 +1,6 @@
 import path from "node:path";
 import fs from "fs-extra";
-import { confirm, input, select } from "@inquirer/prompts";
+import { input, select } from "@inquirer/prompts";
 import type {
   ApiDocs,
   AuthType,
@@ -31,8 +31,12 @@ function numberedChoices<T extends string>(choices: SelectChoice<T>[]): SelectCh
 }
 
 async function confirmYesNo(message: string, defaultValue = false): Promise<boolean> {
-  return confirm({
+  return select<boolean>({
     message: `${message} (Yes/No)`,
+    choices: [
+      { name: "Yes", value: true, short: "Yes" },
+      { name: "No", value: false, short: "No" }
+    ],
     default: defaultValue
   });
 }
