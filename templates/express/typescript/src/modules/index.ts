@@ -5,8 +5,9 @@ import healthRoutes from "./health/health.routes.js";
 const router = Router();
 
 router.get("/", (_req, res) => {
-  return sendSuccess(res, "{{PROJECT_NAME}} API is running", {
+  return sendSuccess(res, "{{PROJECT_NAME}} Express API is running", {
     service: "{{PROJECT_NAME}}",
+    framework: "Express",
     health: "/health"
   });
 });

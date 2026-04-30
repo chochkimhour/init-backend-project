@@ -1,4 +1,4 @@
-# init-backend-project
+﻿# init-backend-project
 
 [![npm](https://img.shields.io/badge/npm-init--backend--project-cb3837)](https://www.npmjs.com/package/init-backend-project)
 [![version](https://img.shields.io/npm/v/init-backend-project?label=version&color=blue)](https://www.npmjs.com/package/init-backend-project)
@@ -9,7 +9,7 @@
 
 Create clean, runnable backend starter projects for Node.js, Express, Fastify, and NestJS with one interactive CLI.
 
-`init-backend-project` generates real starter code with framework-specific app startup, a health endpoint, environment config, consistent response helpers, error handling, and optional setup for Docker, testing, linting, validation, authentication, databases, and ORMs.
+`init-backend-project` generates real starter code with framework-specific app startup, a health endpoint, environment config, consistent response helpers, error handling, and optional setup for Docker Compose, testing, linting, validation, authentication, databases, and ORMs.
 
 ## Requirements
 
@@ -200,7 +200,7 @@ Testing:
 
 Optional tools:
 
-- Docker
+- Docker and Docker Compose
 - ESLint and Prettier
 - Git initialization
 - Dependency installation
@@ -219,6 +219,13 @@ yarn dev
 
 ```bash
 pnpm dev
+```
+
+When the server starts, the terminal prints the framework and health check URLs:
+
+```text
+[my-api] Express API running on http://localhost:3000
+[my-api] Health check: http://localhost:3000/health
 ```
 
 Build TypeScript projects:
@@ -276,14 +283,22 @@ $ npx init-backend-project
 > 1. None
   2. Zod
   3. Joi
-? Include Docker? No
-? Include ESLint and Prettier? Yes
+? Include Docker and Docker Compose? (Yes/No)
+  Yes
+> No
+? Include ESLint and Prettier? (Yes/No)
+> Yes
+  No
 ? Include testing setup?
 > 1. None
   2. Jest
   3. Vitest
-? Initialize Git? No
-? Install dependencies after generation? Yes
+? Initialize Git repository? (Yes/No)
+  Yes
+> No
+? Install dependencies after generation? (Yes/No)
+> Yes
+  No
 Project files created.
 Dependencies installed.
 
@@ -291,6 +306,8 @@ Project created successfully: my-backend
 
 - Next steps
     cd my-backend
+
+- Run locally
     npm run dev
 
 - API endpoints

@@ -30,29 +30,15 @@ function numberedChoices<T extends string>(choices: SelectChoice<T>[]): SelectCh
   }));
 }
 
-async function confirmYesNo(message: string): Promise<boolean> {
-  const answer = await input({
+async function confirmYesNo(message: string, defaultValue = false): Promise<boolean> {
+  return select<boolean>({
     message: `${message} (Yes/No)`,
-    validate(value) {
-      return parseYesNo(value) === undefined ? "Please enter Yes or No." : true;
-    }
+    choices: [
+      { name: "Yes", value: true, short: "Yes" },
+      { name: "No", value: false, short: "No" }
+    ],
+    default: defaultValue
   });
-
-  return parseYesNo(answer) ?? false;
-}
-
-function parseYesNo(value: string): boolean | undefined {
-  const normalizedValue = value.trim().toLowerCase();
-
-  if (["y", "yes"].includes(normalizedValue)) {
-    return true;
-  }
-
-  if (["n", "no"].includes(normalizedValue)) {
-    return false;
-  }
-
-  return undefined;
 }
 
 export async function promptForProjectOptions(defaultName?: string): Promise<ProjectOptions> {
@@ -65,7 +51,7 @@ export async function promptForProjectOptions(defaultName?: string): Promise<Pro
   const targetDirectory = path.resolve(process.cwd(), projectName);
   const exists = await fs.pathExists(targetDirectory);
   const overwrite = exists
-    ? await confirmYesNo(`Folder "${projectName}" already exists. Overwrite it?`)
+    ? await confirmYesNo(`Folder "${projectName}" already exists. Overwrite it?`, false)
     : false;
 
   const framework = await select<Framework>({
@@ -162,8 +148,8 @@ export async function promptForProjectOptions(defaultName?: string): Promise<Pro
     ])
   });
 
-  const includeDocker = await confirmYesNo("Include Docker?");
-  const includeLinting = await confirmYesNo("Include ESLint and Prettier?");
+  const includeDocker = await confirmYesNo("Include Docker and Docker Compose?", false);
+  const includeLinting = await confirmYesNo("Include ESLint and Prettier?", true);
 
   const testing = await select<Testing>({
     message: "Include testing setup?",
@@ -174,8 +160,8 @@ export async function promptForProjectOptions(defaultName?: string): Promise<Pro
     ])
   });
 
-  const initGit = await confirmYesNo("Initialize Git?");
-  const installDependencies = await confirmYesNo("Install dependencies after generation?");
+  const initGit = await confirmYesNo("Initialize Git repository?", false);
+  const installDependencies = await confirmYesNo("Install dependencies after generation?", true);
 
   return {
     projectName,
