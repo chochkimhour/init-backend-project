@@ -974,7 +974,6 @@ function printSuccessMessage(options: ProjectOptions) {
   logger.plain("    Health check: http://localhost:3000/health");
   logger.plain("");
 
-  logger.plain("-------------------------------------------------------------");
   logger.info(chalk.bold("init-backend-project — created by Choch Kimhour"));
   logger.plain("");
 }

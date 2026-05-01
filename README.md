@@ -314,7 +314,6 @@ Project created successfully: my-backend
     Local API:    http://localhost:3000
     Health check: http://localhost:3000/health
 
--------------------------------------------------------------
 init-backend-project — created by Choch Kimhour.
 ```
 
