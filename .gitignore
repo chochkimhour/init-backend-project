@@ -48,3 +48,5 @@ Thumbs.db
 
 # Local npm package archives
 *.tgz
+
+dist/
