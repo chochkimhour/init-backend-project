@@ -95,8 +95,6 @@ export async function generateProject(options: ProjectOptions) {
     await fs.ensureDir(options.targetDirectory);
   }
 
-  const spinner = ora("Creating project files...").start();
-
   try {
     await copyTemplate(options);
     await writeBaseProjectFiles(options);
@@ -112,10 +110,7 @@ export async function generateProject(options: ProjectOptions) {
     if (options.testing !== "none") {
       await writeTestingFiles(options);
     }
-
-    spinner.succeed("Project files created.");
   } catch (error) {
-    spinner.fail("Failed to create project files.");
     throw error;
   }
 

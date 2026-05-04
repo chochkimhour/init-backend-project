@@ -251,7 +251,7 @@ $ npx init-backend-project
 |_|_| |_|_|\__| |_.__/ \__,_|\___|_|\_\___|_| |_|\__,_| | .__/|_|  \___// |\___|\___|\__|
                                                         |_|          |__/
 
-? Project name: my-backend
+? Project name: my-api
 ? Backend framework:
   1. Node.js
 > 2. Express
@@ -283,38 +283,41 @@ $ npx init-backend-project
 > 1. None
   2. Zod
   3. Joi
-? Include Docker and Docker Compose? (Yes/No)
+? Docker support?
   Yes
 > No
-? Include ESLint and Prettier? (Yes/No)
-> Yes
-  No
-? Include testing setup?
+? Code quality tools:
+> ESLint + Prettier
+  None
+? Testing framework:
 > 1. None
   2. Jest
   3. Vitest
-? Initialize Git repository? (Yes/No)
+? Git repository?
   Yes
 > No
-? Install dependencies after generation? (Yes/No)
+? Install dependencies?
 > Yes
   No
-Project files created.
-Dependencies installed.
+✔ Dependencies installed.
 
-Project created successfully: my-backend
+✔ Project created successfully: my-api
 
-- Next steps
-    cd my-backend
+Next steps
+----------
+    cd my-api
 
-- Run locally
+Run locally
+-----------
     npm run dev
 
-- API endpoints
-    Local API:    http://localhost:3000
-    Health check: http://localhost:3000/health
+Endpoints
+---------
+    Local API:     http://localhost:3000
+    Health check:  http://localhost:3000/health
 
-init-backend-project — created by Choch Kimhour.
+───────────────────────────────────────────────
+init-backend-project — created by Choch Kimhour
 ```
 
 ## License

@@ -32,10 +32,21 @@ function numberedChoices<T extends string>(choices: SelectChoice<T>[]): SelectCh
 
 async function confirmYesNo(message: string, defaultValue = false): Promise<boolean> {
   return select<boolean>({
-    message: `${message} (Yes/No)`,
+    message,
     choices: [
       { name: "Yes", value: true, short: "Yes" },
       { name: "No", value: false, short: "No" }
+    ],
+    default: defaultValue
+  });
+}
+
+async function selectFeatureLabel(message: string, enabledLabel: string, defaultValue = false): Promise<boolean> {
+  return select<boolean>({
+    message,
+    choices: [
+      { name: enabledLabel, value: true, short: enabledLabel },
+      { name: "None", value: false, short: "None" }
     ],
     default: defaultValue
   });
@@ -121,8 +132,8 @@ export async function promptForProjectOptions(defaultName?: string): Promise<Pro
     message: "Authentication:",
     choices: numberedChoices([
       { name: "None", value: "none" },
-      { name: "JWT Auth", value: "jwt" },
-      { name: "Session Auth", value: "session" }
+      { name: "JWT", value: "jwt" },
+      { name: "Session", value: "session" }
     ])
   });
 
@@ -148,11 +159,11 @@ export async function promptForProjectOptions(defaultName?: string): Promise<Pro
     ])
   });
 
-  const includeDocker = await confirmYesNo("Include Docker and Docker Compose?", false);
-  const includeLinting = await confirmYesNo("Include ESLint and Prettier?", true);
+  const includeDocker = await confirmYesNo("Docker support?", false);
+  const includeLinting = await selectFeatureLabel("Code quality tools:", "ESLint + Prettier", true);
 
   const testing = await select<Testing>({
-    message: "Include testing setup?",
+    message: "Testing framework:",
     choices: numberedChoices([
       { name: "None", value: "none" },
       { name: "Jest", value: "jest" },
@@ -160,8 +171,8 @@ export async function promptForProjectOptions(defaultName?: string): Promise<Pro
     ])
   });
 
-  const initGit = await confirmYesNo("Initialize Git repository?", false);
-  const installDependencies = await confirmYesNo("Install dependencies after generation?", true);
+  const initGit = await confirmYesNo("Git repository?", false);
+  const installDependencies = await confirmYesNo("Install dependencies?", true);
 
   return {
     projectName,
